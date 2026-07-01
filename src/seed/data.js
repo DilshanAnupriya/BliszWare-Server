@@ -1,0 +1,242 @@
+// Sample catalogue data. Images are hosted on Unsplash so the storefront looks
+// real even before you wire up Cloudinary. Prices are in LKR.
+
+const img = (id) => ({
+  url: `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=80`,
+});
+
+// Build a standard EU size run with the given stock per size.
+const sizes = (run, stock = 12) => run.map((size) => ({ size, stock }));
+
+export const products = [
+  {
+    name: 'Nike Air Max Pulse',
+    brand: 'Nike',
+    category: 'Men',
+    description:
+      'Inspired by the London music scene, the Air Max Pulse brings a rugged, utilitarian edge to the Air Max line. A vacuum-Tuned Air unit delivers responsive cushioning while the breathable mesh upper keeps you comfortable all day.',
+    price: 32500,
+    compareAtPrice: 38000,
+    colors: ['Black', 'Grey'],
+    images: [img('1542291026-7eec264c27ff'), img('1608231387042-66d1773070a5'), img('1600185365926-3a2ce3cdb9eb')],
+    variants: sizes([40, 41, 42, 43, 44, 45], 10),
+    tags: ['running', 'air', 'lifestyle'],
+    featured: true,
+    rating: 4.7,
+    numReviews: 24,
+  },
+  {
+    name: 'Adidas Ultraboost Light',
+    brand: 'Adidas',
+    category: 'Men',
+    description:
+      'Our lightest Ultraboost ever. The new BOOST Light midsole gives you epic energy return with reduced weight. A Primeknit upper adapts to the shape of your foot for a supportive, sock-like fit.',
+    price: 41000,
+    colors: ['White', 'Blue'],
+    images: [img('1605348532760-6753d2c43329'), img('1514989940723-e8e51635b782'), img('1595950653106-6c9ebd614d3a')],
+    variants: sizes([39, 40, 41, 42, 43, 44], 8),
+    tags: ['running', 'boost', 'performance'],
+    featured: true,
+    rating: 4.8,
+    numReviews: 31,
+  },
+  {
+    name: 'Puma RS-X Reinvention',
+    brand: 'Puma',
+    category: 'Unisex',
+    description:
+      'Bold, chunky and unapologetically retro. The RS-X reinvents Puma’s Running System technology with exaggerated design lines and cushioned comfort for everyday wear.',
+    price: 27500,
+    compareAtPrice: 30000,
+    colors: ['White', 'Red'],
+    images: [img('1551107696-a4b0c5a0d9a2'), img('1556906781-9a412961c28c'), img('1491553895911-0055eca6402d')],
+    variants: sizes([38, 39, 40, 41, 42, 43, 44], 14),
+    tags: ['lifestyle', 'retro', 'street'],
+    featured: true,
+    rating: 4.5,
+    numReviews: 18,
+  },
+  {
+    name: 'New Balance 574 Core',
+    brand: 'New Balance',
+    category: 'Unisex',
+    description:
+      'An icon since 1988. The 574 blends performance heritage with everyday style. ENCAP midsole technology combines lightweight foam with a durable polyurethane rim for all-day support.',
+    price: 24000,
+    colors: ['Grey', 'Navy'],
+    images: [img('1539185441755-769473a23570'), img('1460353581641-37baddab0fa2'), img('1606107557195-0e29a4b5b4aa')],
+    variants: sizes([39, 40, 41, 42, 43, 44, 45], 9),
+    tags: ['classic', 'lifestyle'],
+    featured: true,
+    rating: 4.6,
+    numReviews: 27,
+  },
+  {
+    name: 'Converse Chuck 70 High',
+    brand: 'Converse',
+    category: 'Unisex',
+    description:
+      'The Chuck 70 is a premium take on the original. A higher rubber foxing, cushioned OrthoLite insole and heavier canvas give it a vintage look with modern comfort.',
+    price: 18500,
+    colors: ['Black', 'White'],
+    images: [img('1556906781-9a412961c28c'), img('1542291026-7eec264c27ff')],
+    variants: sizes([37, 38, 39, 40, 41, 42, 43], 16),
+    tags: ['classic', 'canvas', 'high-top'],
+    rating: 4.4,
+    numReviews: 12,
+  },
+  {
+    name: 'Nike Pegasus 41',
+    brand: 'Nike',
+    category: 'Women',
+    description:
+      'A responsive everyday running shoe. Dual Air Zoom units and ReactX foam combine for a springy ride mile after mile, with engineered mesh keeping things breathable.',
+    price: 36000,
+    colors: ['Pink', 'White'],
+    images: [img('1595950653106-6c9ebd614d3a'), img('1600185365926-3a2ce3cdb9eb')],
+    variants: sizes([36, 37, 38, 39, 40, 41], 7),
+    tags: ['running', 'women', 'performance'],
+    featured: true,
+    rating: 4.7,
+    numReviews: 21,
+  },
+  {
+    name: 'Adidas Samba OG',
+    brand: 'Adidas',
+    category: 'Unisex',
+    description:
+      'A timeless terrace classic. The Samba OG pairs a soft leather upper with a gum rubber outsole and signature T-toe for street-ready style that never goes out of fashion.',
+    price: 22000,
+    colors: ['Black', 'White'],
+    images: [img('1525966222134-fcfa99b8ae77'), img('1514989940723-e8e51635b782')],
+    variants: sizes([38, 39, 40, 41, 42, 43, 44], 5),
+    tags: ['classic', 'street', 'lifestyle'],
+    rating: 4.9,
+    numReviews: 44,
+  },
+  {
+    name: 'Puma Suede Classic',
+    brand: 'Puma',
+    category: 'Men',
+    description:
+      'A street culture legend since 1968. The Suede Classic features a soft suede upper, signature formstrip and timeless silhouette that has defined generations of style.',
+    price: 16500,
+    compareAtPrice: 19000,
+    colors: ['Blue', 'Red'],
+    images: [img('1551107696-a4b0c5a0d9a2'), img('1491553895911-0055eca6402d')],
+    variants: sizes([39, 40, 41, 42, 43, 44], 11),
+    tags: ['classic', 'suede'],
+    rating: 4.3,
+    numReviews: 9,
+  },
+  {
+    name: 'New Balance Fresh Foam X',
+    brand: 'New Balance',
+    category: 'Men',
+    description:
+      'Plush, data-driven cushioning. The Fresh Foam X midsole is precision-engineered for a soft yet stable ride, ideal for long runs and daily training alike.',
+    price: 39500,
+    colors: ['Black', 'Green'],
+    images: [img('1539185441755-769473a23570'), img('1460353581641-37baddab0fa2')],
+    variants: sizes([40, 41, 42, 43, 44, 45], 6),
+    tags: ['running', 'performance'],
+    featured: true,
+    rating: 4.6,
+    numReviews: 15,
+  },
+  {
+    name: 'Nike Air Force 1 ’07',
+    brand: 'Nike',
+    category: 'Unisex',
+    description:
+      'The radiance lives on. The AF1 ’07 stays true to its roots with crisp leather, bold colour and the perfect amount of flash. A classic that goes with everything.',
+    price: 28000,
+    colors: ['White'],
+    images: [img('1600185365926-3a2ce3cdb9eb'), img('1606107557195-0e29a4b5b4aa'), img('1595950653106-6c9ebd614d3a')],
+    variants: sizes([38, 39, 40, 41, 42, 43, 44, 45], 20),
+    tags: ['classic', 'lifestyle', 'street'],
+    featured: true,
+    rating: 4.8,
+    numReviews: 52,
+  },
+  {
+    name: 'Reebok Classic Leather',
+    brand: 'Reebok',
+    category: 'Unisex',
+    description:
+      'Soft garment leather, a die-cut EVA midsole and a clean silhouette make the Classic Leather an everyday staple with all-day comfort.',
+    price: 17500,
+    colors: ['White', 'Grey'],
+    images: [img('1491553895911-0055eca6402d'), img('1525966222134-fcfa99b8ae77')],
+    variants: sizes([38, 39, 40, 41, 42, 43], 13),
+    tags: ['classic', 'leather'],
+    rating: 4.2,
+    numReviews: 7,
+  },
+  {
+    name: 'Adidas Forum Low Kids',
+    brand: 'Adidas',
+    category: 'Kids',
+    description:
+      'A basketball icon scaled down for younger feet. The Forum Low brings retro hoops style with an adjustable strap for an easy, secure fit.',
+    price: 14000,
+    colors: ['White', 'Blue'],
+    images: [img('1514989940723-e8e51635b782'), img('1605348532760-6753d2c43329')],
+    variants: sizes([30, 31, 32, 33, 34, 35], 10),
+    tags: ['kids', 'classic'],
+    rating: 4.5,
+    numReviews: 6,
+  },
+];
+
+export const promotions = [
+  {
+    code: 'WELCOME10',
+    description: '10% off your first order',
+    type: 'percentage',
+    value: 10,
+    minSpend: 10000,
+    maxDiscount: 5000,
+    isActive: true,
+  },
+  {
+    code: 'FREESHIP',
+    description: 'Rs 350 off (covers standard shipping)',
+    type: 'fixed',
+    value: 350,
+    minSpend: 5000,
+    isActive: true,
+  },
+  {
+    code: 'SAVE2000',
+    description: 'Rs 2,000 off orders over Rs 25,000',
+    type: 'fixed',
+    value: 2000,
+    minSpend: 25000,
+    isActive: true,
+  },
+];
+
+export const testimonials = [
+  {
+    name: 'Nimal Perera',
+    location: 'Colombo, Sri Lanka',
+    rating: 5,
+    order: 1,
+    text: 'Ordered the Air Force 1s on Friday and they arrived Sunday morning. 100% authentic, exactly as pictured. My go-to sneaker store now.',
+  },
+  {
+    name: 'Aisha Rahman',
+    location: 'Kandy, Sri Lanka',
+    rating: 5,
+    order: 2,
+    text: 'The size guide was spot on and checkout with Cash on Delivery was so easy. Loved the tracking updates the whole way.',
+  },
+  {
+    name: 'Dinesh Fernando',
+    location: 'Galle, Sri Lanka',
+    rating: 5,
+    order: 3,
+    text: 'Great prices compared to everywhere else, and delivery to Galle was quick. The Ultraboosts are unreal. Highly recommend Bliszware.',
+  },
+];
