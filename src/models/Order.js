@@ -92,14 +92,20 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, enum: ORDER_STATUSES, default: 'Pending', index: true },
     tracking: { type: [trackingEventSchema], default: [] },
 
-    // Courier shipment
+    // Courier shipment — entered manually by the admin when handing the
+    // parcel to a third-party courier company.
     shipment: {
-      courier: { type: String }, // e.g. Koombiyo, Domex, Pronto, Manual
+      courier: { type: String }, // courier company name, e.g. "Koombiyo"
       trackingNumber: { type: String },
+      trackingUrl: { type: String }, // courier's own tracking page (optional)
       status: { type: String },
       assignedAt: { type: Date },
       estimatedDelivery: { type: Date },
     },
+
+    // True while this order holds reserved stock (set on confirm/COD,
+    // cleared when a cancellation returns the items to inventory).
+    stockReserved: { type: Boolean, default: false },
 
     deliveredAt: { type: Date },
   },

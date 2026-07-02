@@ -14,6 +14,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import testimonialRoutes from './routes/testimonialRoutes.js';
+import { getSettings } from './controllers/settingsController.js';
 import { mongoSanitize } from './middleware/sanitize.js';
 import { notFound, errorHandler } from './middleware/error.js';
 
@@ -74,6 +75,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/testimonials', testimonialRoutes);
+app.get('/api/settings', getSettings); // public: bank details + WhatsApp contact
 app.use('/api/admin', adminRoutes);
 
 // 404 + error handling (must be last)

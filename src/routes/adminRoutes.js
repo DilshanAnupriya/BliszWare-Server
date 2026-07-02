@@ -9,8 +9,7 @@ import {
   adminGetOrders,
   updateOrderStatus,
   confirmOrderPayment,
-  getCouriers,
-  shipOrder,
+  setOrderCourier,
   getShippingLabel,
   adminGetCustomers,
   adminGetUsers,
@@ -30,6 +29,7 @@ import {
   deleteTestimonial,
 } from '../controllers/testimonialController.js';
 import { exportCsv, importTemplate, importProducts } from '../controllers/csvController.js';
+import { updateSettings } from '../controllers/settingsController.js';
 import { protect, admin, superAdmin } from '../middleware/auth.js';
 import { uploadCsv } from '../middleware/upload.js';
 
@@ -58,10 +58,12 @@ router.get('/orders', adminGetOrders);
 router.put('/orders/:id/status', updateOrderStatus);
 router.post('/orders/:id/confirm', confirmOrderPayment);
 
-// Courier / fulfilment
-router.get('/couriers', getCouriers);
-router.post('/orders/:id/ship', shipOrder);
+// Fulfilment — courier details are entered manually by the admin
+router.put('/orders/:id/courier', setOrderCourier);
 router.get('/orders/:id/label', getShippingLabel);
+
+// Store settings (bank details, WhatsApp number)
+router.put('/settings', updateSettings);
 
 // Customers
 router.get('/customers', adminGetCustomers);

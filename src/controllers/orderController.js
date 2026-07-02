@@ -149,6 +149,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     couponCode: appliedCode,
     totalPrice,
     status,
+    stockReserved: reserveStockNow,
   });
 
   // Cash on Delivery is a committed order — reserve stock immediately.
@@ -263,6 +264,7 @@ export const trackOrder = asyncHandler(async (req, res) => {
         ? {
             courier: order.shipment.courier,
             trackingNumber: order.shipment.trackingNumber,
+            trackingUrl: order.shipment.trackingUrl,
             estimatedDelivery: order.shipment.estimatedDelivery,
           }
         : null,

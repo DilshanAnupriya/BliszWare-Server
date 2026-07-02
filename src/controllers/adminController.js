@@ -3,10 +3,9 @@ import Product from '../models/Product.js';
 import Order, { ORDER_STATUSES } from '../models/Order.js';
 import User from '../models/User.js';
 import Promotion from '../models/Promotion.js';
-import { createShipment, listCouriers } from '../utils/courier.js';
 import { generateLabelPdf } from '../utils/shippingLabel.js';
 import { sendEmail, shipmentTemplate, orderConfirmedTemplate } from '../utils/sendEmail.js';
-import { decrementStockAndAlert } from '../utils/stock.js';
+import { decrementStockAndAlert, restockItems } from '../utils/stock.js';
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -151,10 +150,19 @@ export const updateStock = asyncHandler(async (req, res) => {
 // @route  GET /api/admin/orders
 // @access Admin
 export const adminGetOrders = asyncHandler(async (req, res) => {
-  const { status, search, page = 1, limit = 20 } = req.query;
+  const { status, search, from, to, page = 1, limit = 20 } = req.query;
   const filter = {};
   if (status && status !== 'All') filter.status = status;
   if (search) filter.orderNumber = new RegExp(search, 'i');
+
+  // Date / month / range filter on the order's creation time.
+  // `from`/`to` are YYYY-MM-DD strings; `to` is inclusive (end of that day).
+  const created = {};
+  const fromDate = from ? new Date(`${from}T00:00:00`) : null;
+  const toDate = to ? new Date(`${to}T23:59:59.999`) : null;
+  if (fromDate && !Number.isNaN(+fromDate)) created.$gte = fromDate;
+  if (toDate && !Number.isNaN(+toDate)) created.$lte = toDate;
+  if (Object.keys(created).length) filter.createdAt = created;
 
   const perPage = Number(limit);
   const skip = (Number(page) - 1) * perPage;
@@ -185,6 +193,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 
+  const previous = order.status;
   order.status = status;
   order.tracking.push({ status, note: note || `Status updated to ${status}` });
   if (status === 'Delivered') {
@@ -194,9 +203,23 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       order.paidAt = new Date();
     }
   }
+
+  // Cancelling returns reserved items to inventory; un-cancelling into an
+  // active fulfilment stage takes them back out.
+  if (status === 'Cancelled' && order.stockReserved) {
+    await restockItems(order.items);
+    order.stockReserved = false;
+  } else if (previous === 'Cancelled' && !order.stockReserved && FULFILLMENT_ACTIVE.includes(status)) {
+    await decrementStockAndAlert(order.items);
+    order.stockReserved = true;
+  }
+
   await order.save();
   res.json({ order });
 });
+
+// Statuses that mean the order holds stock again if it's revived from Cancelled.
+const FULFILLMENT_ACTIVE = ['Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
 
 // @desc   Confirm an order's payment (bank-deposit verified or WhatsApp settled)
 // @route  POST /api/admin/orders/:id/confirm
@@ -225,6 +248,7 @@ export const confirmOrderPayment = asyncHandler(async (req, res) => {
   }
   order.status = 'Confirmed';
   order.tracking.push({ status: 'Confirmed', note: 'Payment confirmed by admin' });
+  order.stockReserved = true;
   await order.save();
 
   // Reserve stock now that payment is confirmed (and alert on low stock).
@@ -247,42 +271,44 @@ export const confirmOrderPayment = asyncHandler(async (req, res) => {
 // Courier / fulfilment
 // ─────────────────────────────────────────────────────────────
 
-// @desc   List available couriers (with live/demo status)
-// @route  GET /api/admin/couriers
+// @desc   Save courier details entered by the admin (third-party handover
+//         is done manually — this just records who has the parcel)
+// @route  PUT /api/admin/orders/:id/courier
 // @access Admin
-export const getCouriers = asyncHandler(async (req, res) => {
-  res.json({ couriers: listCouriers() });
-});
+export const setOrderCourier = asyncHandler(async (req, res) => {
+  const { courier, trackingNumber, trackingUrl } = req.body;
+  if (!String(courier || '').trim() || !String(trackingNumber || '').trim()) {
+    res.status(400);
+    throw new Error('Courier company and tracking number are required');
+  }
+  if (trackingUrl && !/^https?:\/\//i.test(String(trackingUrl).trim())) {
+    res.status(400);
+    throw new Error('Tracking URL must start with http:// or https://');
+  }
 
-// @desc   Assign a courier to an order and mark it shipped
-// @route  POST /api/admin/orders/:id/ship
-// @access Admin
-export const shipOrder = asyncHandler(async (req, res) => {
-  const { courier = 'Manual' } = req.body;
   const order = await Order.findById(req.params.id).populate('user', 'email name');
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
 
-  const shipment = await createShipment(order, courier);
+  const isNew = !order.shipment?.trackingNumber;
   order.shipment = {
-    courier: shipment.courier,
-    trackingNumber: shipment.trackingNumber,
-    status: shipment.status,
-    assignedAt: shipment.assignedAt,
-    estimatedDelivery: shipment.estimatedDelivery,
+    ...order.shipment,
+    courier: String(courier).trim(),
+    trackingNumber: String(trackingNumber).trim(),
+    trackingUrl: String(trackingUrl || '').trim() || undefined,
+    assignedAt: order.shipment?.assignedAt || new Date(),
   };
-  order.status = 'Shipped';
   order.tracking.push({
-    status: 'Shipped',
-    note: `Shipped via ${shipment.courier} · Tracking ${shipment.trackingNumber}`,
+    status: order.status,
+    note: `${isNew ? 'Handed to courier' : 'Courier details updated'}: ${order.shipment.courier} · Tracking ${order.shipment.trackingNumber}`,
   });
   await order.save();
 
-  // Notify the customer their order has shipped.
+  // Tell the customer their parcel is with the courier (first time only).
   const to = order.user?.email || order.guestEmail;
-  if (to) {
+  if (to && isNew) {
     sendEmail({
       to,
       subject: `Your order ${order.orderNumber} has shipped — Bliszware`,

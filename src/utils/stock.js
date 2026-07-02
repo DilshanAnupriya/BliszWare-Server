@@ -8,6 +8,18 @@ export const LOW_STOCK_THRESHOLD = 5;
  * any affected product has dropped to/below the low-stock threshold.
  * Centralised so COD, PayHere and the demo-confirm paths all behave the same.
  */
+/** Return ordered quantities to per-size stock (e.g. when an order is cancelled). */
+export const restockItems = async (items) => {
+  await Promise.all(
+    items.map((i) =>
+      Product.updateOne(
+        { _id: i.product, 'variants.size': i.size },
+        { $inc: { 'variants.$.stock': i.quantity } }
+      )
+    )
+  );
+};
+
 export const decrementStockAndAlert = async (items) => {
   await Promise.all(
     items.map((i) =>
